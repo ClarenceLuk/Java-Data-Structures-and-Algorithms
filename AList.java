@@ -7,7 +7,8 @@ import java.util.Arrays;
  @author Timothy M. Henry
  @version 5.0
  */
-public class AList<T extends Comparable<? super T>> implements ListInterface<T>
+
+public class AList<T extends Comparable<? super T>> implements ListInterface<T>, Comparable<AList<T>>
 {
    private T[] list;   // Array of list entries; ignore list[0]
    private int numberOfEntries;
@@ -33,6 +34,7 @@ public class AList<T extends Comparable<? super T>> implements ListInterface<T>
       // The cast is safe because the new array contains null entries
       @SuppressWarnings("unchecked")
       T[] tempList = (T[])new Comparable[initialCapacity + 1];
+      
       list = tempList;
       numberOfEntries = 0;
       integrityOK = true;
@@ -128,6 +130,7 @@ public class AList<T extends Comparable<? super T>> implements ListInterface<T>
       // The cast is safe because the new array contains null entries
       @SuppressWarnings("unchecked")
       T[] result = (T[])new Comparable[numberOfEntries]; // Unchecked cast
+      
       for (int index = 0; index < numberOfEntries; index++)
       {
          result[index] = list[index + 1];
@@ -257,30 +260,75 @@ public class AList<T extends Comparable<? super T>> implements ListInterface<T>
 	}
 
 	public int removeEvery(T element) {
-		int numReplaced = 0;
+		int numRemoved = 0;
       for(int i = 1; i <= numberOfEntries; i++)
       {
-         while(list[i + numReplaced] == element)
+         if(list[i].equals(element))
          {
-            numReplaced++;
-         }
-         if(i + numReplaced < numberOfEntries)
-         {
-            list[i] = list[i + numReplaced];
-         }
-         else
-         {
-            list[i] = null;
+            this.remove(i);
+            i--;
+            numRemoved++;
          }
       }
-      numberOfEntries = numberOfEntries - numReplaced;
-		return numReplaced;
+      return numRemoved;
 	}
    
-   @Override
-   public boolean equals(Object obj){
-      return false;
+   public void display()
+   {
+      for(int i = 0; i <= numberOfEntries; i++)
+      {
+         System.out.println(list[i]);
+      }
    }
-   
+   @Override
+   public boolean equals(Object obj) {
+      boolean result = false;
+      if(obj instanceof AList<?>) {
+         AList<T> otherList = (AList<T>) obj;
+         T[] tempList = (T[])new Comparable[otherList.getLength()];
+         tempList = otherList.toArray();
+         if(numberOfEntries != otherList.getLength()) {
+            return false;
+         }
+         else {
+            for(int i = 0; i < numberOfEntries; i++) {
+               if(tempList[i] != list[i+1]) {
+                  return false;
+               }
+               else {
+                  result = true;
+               }
+            }
+         }
+      }
+      return result;
+   }
+   @Override
+   public int compareTo(AList<T> otherList) {
+      int result = 0;
+      T[] tempList = (T[])new Comparable[otherList.getLength()];
+      tempList = otherList.toArray();
+      if(otherList.getLength() != this.numberOfEntries) {
+         if(otherList.getLength() > this.numberOfEntries) {
+            result--;
+         }
+         else if(otherList.getLength() < this.numberOfEntries) {
+            result++;
+         }
+      }
+      else {
+         for(int i = 0; i < numberOfEntries; i++) {
+            if(list[i+1] != tempList[i]) {
+               if(list[i+1].compareTo(tempList[i]) > 0) {
+                  result++;
+               }
+               if(list[i+1].compareTo(tempList[i]) < 0) {
+                  result--;
+               }
+            }
+         }
+      }
+      return result;
+   }
 } // end AList
 
